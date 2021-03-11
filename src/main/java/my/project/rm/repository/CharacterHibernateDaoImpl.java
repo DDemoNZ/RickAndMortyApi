@@ -2,15 +2,17 @@ package my.project.rm.repository;
 
 import my.project.rm.entity.RMCharacter;
 import org.springframework.stereotype.Repository;
-
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.util.ArrayList;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.List;
-import java.util.Random;
+import java.util.Optional;
 
-//@Repository //Can be used instead of JpaRepository
+@Repository //Can be used instead of JpaRepository
 public class CharacterHibernateDaoImpl implements CharacterHibernateDao {
 
     private final EntityManager entityManager;
@@ -21,8 +23,19 @@ public class CharacterHibernateDaoImpl implements CharacterHibernateDao {
 
     @Override
     public List<RMCharacter> saveAll(List<RMCharacter> characters) {
-        characters.forEach(entityManager::persist);
-        return new ArrayList<>();
+        for (RMCharacter character : characters) {
+            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+            CriteriaQuery<RMCharacter> query = criteriaBuilder.createQuery(RMCharacter.class);
+            Root<RMCharacter> from = query.from(RMCharacter.class);
+            Predicate predicate = criteriaBuilder.equal(from.get("id"), character.getId());
+
+            query.where(predicate);
+            TypedQuery<RMCharacter> managerQuery = entityManager.createQuery(query);
+            if (managerQuery.getResultList().isEmpty()) {
+                entityManager.persist(character);
+            }
+        }
+        return characters;
     }
 
     @Override
@@ -41,31 +54,6 @@ public class CharacterHibernateDaoImpl implements CharacterHibernateDao {
     }
 
     @Override
-    public RMCharacter findById(long id) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<RMCharacter> query = builder.createQuery(RMCharacter.class);
-
-        Root<RMCharacter> from = query.from(RMCharacter.class);
-
-        Predicate randomRowPredicate = builder.equal(from.get("id"), new Random().nextInt((int) (id + 1)));
-
-        CriteriaQuery<RMCharacter> resultQuery = query.select(from).where(randomRowPredicate).distinct(true);
-
-        return entityManager.createQuery(resultQuery).getSingleResult();
-    }
-
-    @Override
-    public Long count() {
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Long> query = criteriaBuilder.createQuery(Long.class);
-        Root<RMCharacter> from = query.from(RMCharacter.class);
-
-        CriteriaQuery<Long> select = query.select(criteriaBuilder.count(from));
-
-        return entityManager.createQuery(select).getSingleResult();
-    }
-
-    @Override
     public List<RMCharacter> findAll() {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<RMCharacter> query = criteriaBuilder.createQuery(RMCharacter.class);
@@ -74,5 +62,17 @@ public class CharacterHibernateDaoImpl implements CharacterHibernateDao {
         CriteriaQuery<RMCharacter> resultQuery = query.select(from);
 
         return entityManager.createQuery(resultQuery).getResultList();
+    }
+
+    @Override
+    public Optional<RMCharacter> findRMCharacterRandom() {
+        String query = "SELECT * FROM characters ORDER BY RANDOM() LIMIT 1;";
+        Query nativeQuery = entityManager.createNativeQuery(query, RMCharacter.class);
+        return Optional.of((RMCharacter) nativeQuery.getSingleResult());
+    }
+
+    @Override
+    public void save(RMCharacter character) {
+        entityManager.persist(character);
     }
 }

@@ -1,8 +1,8 @@
 package my.project.rm.repository;
 
 import my.project.rm.entity.RMCharacter;
-
 import java.util.List;
+import java.util.Optional;
 
 public interface CharacterHibernateDao {
 
@@ -10,10 +10,9 @@ public interface CharacterHibernateDao {
 
     List<RMCharacter> findAllByNameContaining(String name);
 
-    RMCharacter findById(long id);
-
-    Long count();
-
     List<RMCharacter> findAll();
 
+    Optional<RMCharacter> findRMCharacterRandom();
+
+    void save(RMCharacter character);
 }

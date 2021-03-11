@@ -1,7 +1,6 @@
 package my.project.rm.service;
 
 import my.project.rm.entity.RMCharacter;
-
 import java.util.List;
 
 public interface CharacterService {
@@ -13,4 +12,6 @@ public interface CharacterService {
     RMCharacter getRandomCharacter();
 
     List<RMCharacter> findAll();
+
+    void save(RMCharacter character);
 }

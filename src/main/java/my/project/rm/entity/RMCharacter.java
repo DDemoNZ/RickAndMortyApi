@@ -1,5 +1,6 @@
 package my.project.rm.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -11,7 +12,8 @@ public class RMCharacter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long dbId;
+    private Long id;
     private String name;
     private String status;
     private String species;

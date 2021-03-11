@@ -3,10 +3,12 @@ package my.project.rm.service.impl;
 import my.project.rm.entity.RMCharacter;
 import my.project.rm.repository.RMCharacterRepository;
 import my.project.rm.service.CharacterService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.server.ResponseStatusException;
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Random;
+import java.util.Optional;
 
 @Service
 public class CharacterServiceImpl implements CharacterService {
@@ -18,6 +20,7 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
+    @Transactional
     public List<RMCharacter> saveAll(List<RMCharacter> characters) {
         return rmCharacterRepository.saveAll(characters);
     }
@@ -29,12 +32,20 @@ public class CharacterServiceImpl implements CharacterService {
 
     @Override
     public RMCharacter getRandomCharacter() {
-        long count = rmCharacterRepository.count();
-        return rmCharacterRepository.findById(new Random().nextInt((int) (count + 1)));
+        Optional<RMCharacter> rmCharacterRandom = rmCharacterRepository.findRMCharacterRandom();
+        if (rmCharacterRandom.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Character not found");
+        }
+        return rmCharacterRandom.get();
     }
 
     @Override
     public List<RMCharacter> findAll() {
         return rmCharacterRepository.findAll();
+    }
+
+    @Override
+    public void save(RMCharacter character) {
+        rmCharacterRepository.save(character);
     }
 }
