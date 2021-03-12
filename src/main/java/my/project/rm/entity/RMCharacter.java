@@ -11,8 +11,6 @@ import javax.persistence.*;
 public class RMCharacter {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long dbId;
     private Long id;
     private String name;
     private String status;
